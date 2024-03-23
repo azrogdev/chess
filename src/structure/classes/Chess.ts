@@ -59,7 +59,7 @@ export class Chess extends EventEmitter implements GameOptions {
 
         }
     }
-    public get start() {
+    public start() {
         if (this.bot === false && this.data.players.every(element => element instanceof Player) && this.data.players.length === 2) return;
         if (this.bot) {
             const human = new Player(666, this);
