@@ -361,6 +361,3 @@ export class Chess extends EventEmitter implements GameOptions {
         return grid;
     }
 }
-
-const g = new Chess();
-const player = g.players.get(1);
