@@ -1,6 +1,6 @@
 # chess
 
-Welcome to my Chess project, a sophisticated and modern rendition of the classic chess game designed for developers and chess enthusiasts. This project offers an in-depth exploration of chess mechanics and coding strategies, making it a perfect resource for those keen on understanding the game's architecture. Structured meticulously to enhance learning and engagement, the Chess Project caters to a broad spectrum of development interests, ensuring a comprehensive and enriching experience for all.
+Welcome to my chess project, a sophisticated and modern rendition of the classic chess game designed for developers and chess enthusiasts. This project offers an in-depth exploration of chess mechanics and coding strategies, making it a perfect resource for those keen on understanding the game's architecture. Structured meticulously to enhance learning and engagement, the Chess Project caters to a broad spectrum of development interests, ensuring a comprehensive and enriching experience for all.
 
 warning: the code and this readme are not finished yet.
 
