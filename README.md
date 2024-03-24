@@ -1,5 +1,6 @@
 # chess
-This repos contain an advanced structure of a chess game.
+
+Welcome to my Chess project, a sophisticated and modern rendition of the classic chess game designed for developers and chess enthusiasts. This project offers an in-depth exploration of chess mechanics and coding strategies, making it a perfect resource for those keen on understanding the game's architecture. Structured meticulously to enhance learning and engagement, the Chess Project caters to a broad spectrum of development interests, ensuring a comprehensive and enriching experience for all.
 
 warning: the code and this readme are not finished yet.
 
@@ -7,74 +8,62 @@ warning: the code and this readme are not finished yet.
 | Requirement       | Description                                                                                               |
 |-------------------|-----------------------------------------------------------------------------------------------------------|
 | Node.js           | Version 14.x or higher required for optimal compatibility with the project's ES6, ES2016, and ESNext features. |
-| Typescript          | Version 5.3.3 or higher required for optimal compatibility with the project |
-### How to start ?
+| Typescript          | Version 5.3.3 or higher, for optimal compatibility and feature support. |
 
-Before starting make sure to complete the prerequisites. If you don't know how to install typescript, open your project and use `npm i typescript`,
-then use `npx tsc` to compile the code in javascript.
+### Quick Start
+
+1. Install TypeScript via npm: `npm i typescript`
+2. Compile the TypeScript code to JavaScript: `npx tsc`
+3. Initialize your Chess game:
 
 ```js
-import { Chess, Events } from 'path';
+import { Chess, Events } from 'path/to/chess';
 
-const game = new Chess({
-    bot: true
-})
-game.on(Events.GameStarted, (data) => {
-    if (data.data.currentPlayer === 666) {
-        // code to execute if the firstplayer is you.
+const game = new Chess({ bot: true });
+game.on(Events.GameStarted, data => {
+    if (data.currentPlayer === 666) {
+        // Your code here
     }
 });
 
-game.start(); // the game start
+game.start(); // Begins the game
 ```
 
-### How to use Events ?
-You can use **10** events but only **8** have an utility.
-Here is the list of the availables events :`Move`, `IllegalMove`, `PieceSelected`, `PieceCaptured`, `GameStarted`, `GameEnded`, `Check`, `InvalidPosition`.
+### Utilizing Events
+The Chess Project supports **10** events, with **8** having defined utilities. Available events include: `Move`, `IllegalMove`, `PieceSelected`, `PieceCaptured`, `GameStarted`, `GameEnded`, `Check`, `InvalidPosition`.
 
 #### `Move` 
 
-For more information about the notation : [Chess Notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
+For notation details, see [Chess Notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
 
 ```js
-game.players.get(010102201010).play("a1", "a3");
-
-game.on(Events.Move, (data) => {
-    const { from, to, piece, notation, value, grid, stringGrid, stringFlatGrid, currentPlayer } = data;
-    
-    console.log(from) // Output: 'a1'.
-    console.log(to) // Output: 'a3'.
-    console.log(piece) // Output: 'Pawn'.
-    console.log(notation) // Output: 'a3'.
-
-    console.log(stringFlatGrid) // Output: ['RB', 'CB', 'BB', 'QB', 'KB', 'BB', 'CB', 'RB', 'PB', 'PB' ... 'RW'] (optimal grid to create your board)
-})
+game.players.get(123).play("e2", "e4");
+game.on(Events.Move, data => {
+    // Example output for a move event
+    console.log(data.notation); // e.g., "e4"
+});
 ```
 #### `PieceSelected`
-
+To select a piece and explore its possible moves, use the following example:
 ```js
-game.players.get(010102201010).select("a1");
+game.players.get(123).select("d2");
 
 game.on(Events.PieceSelected, (data) => {
     const { moves } = data;
-    console.log(moves) // Output: ['a2', 'a3']
-})
+    console.log(moves); // Outputs possible moves, e.g., ['d3', 'd4']
+});
 ```
 
-But you can also combined events :
-
+## Combining Events
+You can listen to combined events for complex scenarios:
 ```js
-game.on(Events.Move+Events.Check, (data) => {
-    const { notation } = data;
+// For a move that results in check
+game.on(Events.Move + Events.Check, data => {
+    console.log(data.notation); // e.g., "e4+"
+});
 
-    console.log(notation) // Output: Bf6+
-})
-```
-or
-```js
-game.on(Events.Move+Events.Check+Events.PieceCaptured, (data) => {
-    const { notation } = data;
-
-    console.log(notation) // Output: Bxf6+
-})
+// For a move that captures a piece and results in check
+game.on(Events.Move + Events.Check + Events.PieceCaptured, data => {
+    console.log(data.notation); // e.g., "exf6+"
+});
 ```
