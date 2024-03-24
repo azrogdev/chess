@@ -85,10 +85,10 @@ export class Chess extends EventEmitter implements GameOptions {
         if (firstPlayer === 42) {
             this.botMove();
         }
-        this.on(Events.Move, () => this.nextPlayer());
-        this.on(Events.Move + Events.Check, () => this.nextPlayer());
-        this.on(Events.Move + Events.PieceCaptured, () => this.nextPlayer());
-        this.on(Events.Move + Events.Check + Events.PieceCaptured, () => this.nextPlayer());
+        this.on(Events.Move, (data) => this.changeGameState(data));
+        this.on(Events.Move + Events.Check, (data) => this.changeGameState(data));
+        this.on(Events.Move + Events.PieceCaptured, (data) => this.changeGameState(data));
+        this.on(Events.Move + Events.Check + Events.PieceCaptured, (data) => this.changeGameState(data));
         this.on(Events.Play, (data) => {
             const { from, to } = data;
             const piece = this.piece.get(from as string);
@@ -112,6 +112,28 @@ export class Chess extends EventEmitter implements GameOptions {
             const p = piece as PieceGetterData;
             p.select();
         })
+    }
+    private changeGameState(data: any): void {
+        const { x, y } = notToPos(data.to);
+        const piece = this.grid[y][x];
+        if (data.piece === 'Pawn' && Math.abs(parseInt(data.from.charAt(1), 10) - parseInt(data.to.charAt(1), 10)) === 2) {
+            if (piece instanceof Pawn) {
+                piece.canEnPassant = true;
+            }
+        } else if (['King', 'Rook'].includes(data.piece)) {
+            if (piece instanceof Rook || piece instanceof King) {
+                piece.canRook = false;
+            }
+        }
+        this.grid.forEach((row) => row.forEach((p) => {
+            if (p instanceof Pawn && p.color === data.color) {
+                p.canEnPassant = false;
+            }
+            if ((p instanceof Rook || p instanceof King) && data.color === p.color) {
+                p.canRook = false;
+            }
+        }));
+        this.nextPlayer();
     }
     private botMove(): void {
         if (!this.bot || !this.data.started || this.data.ended) return;
@@ -363,3 +385,14 @@ export class Chess extends EventEmitter implements GameOptions {
         return grid;
     }
 }
+
+
+
+const game = new Chess({
+    bot: true
+})
+
+
+
+
+

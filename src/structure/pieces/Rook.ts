@@ -4,8 +4,10 @@ import { notToPos, posToNot } from '../functions/main';
 import { Events } from '../classes/EventEmitter';
 
 export class Rook extends Piece {
+    public canRook: boolean;
     constructor(color: string, position: string, instance: Chess) {
         super(color, PiecesValues.Rook, position, instance);
+        this.canRook = true;
     }
     private isValidPosition(x: number, y: number): boolean {
         return x >= 0 && x <= 7 && y >= 0 && y <= 7;
@@ -42,8 +44,7 @@ export class Rook extends Piece {
     public canMoveTo(x: number, y: number): boolean {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
         const newPosNot = posToNot(x, y);
-        if (this.getAvailableMoves(true).includes(newPosNot)) return true;
-        return false;
+        return this.getAvailableMoves(true).includes(newPosNot)
     }
     public moveTo(x: number, y: number): void {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');

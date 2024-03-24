@@ -3,7 +3,7 @@ import { Chess } from '../classes/Chess';
 class Piece {
     public color: string;
     public value: number;
-    protected position: string;
+    public position: string;
     protected instance: Chess;
     constructor(color: string, value: number, position: string, instance: Chess) {
         this.color = color;

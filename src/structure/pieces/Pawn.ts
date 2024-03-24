@@ -4,8 +4,10 @@ import { notToPos, posToNot } from '../functions/main';
 import { Events } from '../classes/EventEmitter';
 
 export class Pawn extends Piece {
+    public canEnPassant: boolean;
     constructor(color: string, position: string, instance: Chess) {
         super(color, PiecesValues.Pawn, position, instance);
+        this.canEnPassant = false;
     }
     private isValidPosition(x: number, y: number): boolean {
         return x >= 0 && x <= 7 && y >= 0 && y <= 7;
@@ -16,44 +18,40 @@ export class Pawn extends Piece {
     public getAvailableMoves(cache: boolean = false): string[] {
         const { x, y } = notToPos(this.position);
         let moves: string[] = [];
-        if (this.color === "white") {
-            if (y === 6 && this.instance.grid[y - 1][x] === 0 && this.instance.grid[y - 2][x] === 0) {
-                moves.push(posToNot(x, y - 2));
-            }
-            if (this.instance.grid[y - 1][x] === 0) {
-                moves.push(posToNot(x, y - 1));
-            }
-            if (x > 0 && y > 0 && typeof this.instance.grid[y - 1][x - 1] !== 'number') {
-                moves.push(posToNot(x - 1, y - 1));
-            }
-            if (x < 7 && y > 0 && typeof this.instance.grid[y - 1][x + 1] !== 'number') {
-                moves.push(posToNot(x + 1, y - 1));
-            }
-        } else {
-            if (y === 1 && this.instance.grid[y + 1][x] === 0 && this.instance.grid[y + 2][x] === 0) {
-                moves.push(posToNot(x, y + 2));
-            }
-            if (this.instance.grid[y + 1][x] === 0) {
-                moves.push(posToNot(x, y + 1));
-            }
-            if (x > 0 && y < 7 && typeof this.instance.grid[y + 1][x - 1] !== 'number') {
-                moves.push(posToNot(x - 1, y + 1));
-            }
-            if (x < 7 && y < 7 && typeof this.instance.grid[y + 1][x + 1] !== 'number') {
-                moves.push(posToNot(x + 1, y + 1));
-            }
+    
+        const forwardOne = this.color === "white" ? y - 1 : y + 1;
+        const forwardTwo = this.color === "white" ? y - 2 : y + 2;
+        const initialRow = this.color === "white" ? 6 : 1;
+    
+        if (y === initialRow && this.instance.grid[forwardTwo][x] === 0 && this.instance.grid[forwardOne][x] === 0) {
+            moves.push(posToNot(x, forwardTwo));
         }
+        if (this.instance.grid[forwardOne][x] === 0) {
+            moves.push(posToNot(x, forwardOne));
+        }
+    
+        const captureDirections = [-1, 1];
+        captureDirections.forEach(direction => {
+            const newX = x + direction;
+            if (newX >= 0 && newX <= 7) {
+                const target = this.instance.grid[this.color === "white" ? y - 1 : y + 1][newX];
+                const sidePawn = this.instance.grid[y][newX];
+                if (typeof target !== 'number' || (sidePawn instanceof Pawn && sidePawn.canEnPassant)) {
+                    moves.push(posToNot(newX, this.color === "white" ? y - 1 : y + 1));
+                }
+            }
+        });
+    
         return !cache ? moves.filter(move => {
             const { x, y } = notToPos(move);
-            return this.instance.grid[y][x] === 0;
+            return this.instance.grid[y][x] === 0
         }) : moves;
     }
 
     public canMoveTo(x: number, y: number): boolean {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
         const newPosNot = posToNot(x, y);
-        if (this.getAvailableMoves(true).includes(newPosNot)) return true;
-        return false;
+        return this.getAvailableMoves(true).includes(newPosNot)
     }
     public moveTo(x: number, y: number): void {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
@@ -76,6 +74,15 @@ export class Pawn extends Piece {
                 to: posToNot(x, y)
             })
         }
+        const dir = this.color === 'white' ? -1 : 1;
+        if (Math.abs(oldX - x) === Math.abs(oldY - y) && Math.abs(oldY - y) === 1) {
+            const downTarget = this.instance.grid[y+dir][x]
+            if (downTarget instanceof Pawn && downTarget.canEnPassant) {
+                this.instance.grid[y+dir][x] = 0;
+                pieceCaptured = true;
+                pieceValue += downTarget.value;
+            }
+        }
         let event = Events.Move;
         let notation = `${posToNot(x, y)}`;
 
@@ -91,7 +98,7 @@ export class Pawn extends Piece {
         this.instance.emit(event, {
             from: posToNot(oldX, oldY),
             to: this.position,
-            piece: 'Rook',
+            piece: 'Pawn',
             notation: notation,
             value: pieceValue,
             grid: this.instance.grid,

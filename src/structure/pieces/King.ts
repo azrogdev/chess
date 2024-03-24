@@ -2,10 +2,13 @@ import { Chess } from '../classes/Chess';
 import { Piece, PiecesValues } from './Piece';
 import { notToPos, posToNot } from '../functions/main';
 import { Events } from '../classes/EventEmitter';
+import { Rook } from './Rook';
 
 export class King extends Piece {
+    public canRook: boolean;
     constructor(color: string, position: string, instance: Chess) {
         super(color, PiecesValues.King, position, instance);
+        this.canRook = true;
     }
     private isValidPosition(x: number, y: number): boolean {
         return x >= 0 && x <= 7 && y >= 0 && y <= 7;
@@ -31,7 +34,8 @@ export class King extends Piece {
                 moves.push(posToNot(newX, newY));
             }
         }
-
+        if (this.canMoveToRook(true)) moves.push(posToNot(x - 2, y))
+        if (this.canMoveToRook(false)) moves.push(posToNot(x + 2, y))
         return !cache ? moves.filter(move => {
             const { x, y } = notToPos(move);
             return this.instance.grid[y][x] === 0;
@@ -40,13 +44,30 @@ export class King extends Piece {
     public canMoveTo(x: number, y: number): boolean {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
         const newPosNot = posToNot(x, y);
-        if (this.getAvailableMoves(true).includes(newPosNot)) return true;
-        return false;
+        return this.getAvailableMoves(true).includes(newPosNot)
+    }
+    private canMoveToRook(long: boolean): boolean {
+        const tabPos = this.color === 'white' ? [{ x: 7, y: 7 }, { x: 0, y: 7 }] : [{ x: 7, y: 0 }, { x: 0, y: 0 }];
+        const pos = long ? tabPos[1] : tabPos[0];
+        const dir = long ? -1 : 1;
+        const { x, y } = notToPos(this.position);
+        var pathIsClear = true;
+        for (let i = 1; i < (long ? 4 : 3); i++) {
+            const target = this.instance.grid[y][x + (dir * i)];
+            if (target !== 0 && !(target instanceof Rook && target.canRook)) {
+                pathIsClear = false;
+                break;
+            }
+        }
+        return pathIsClear;
     }
     public moveTo(x: number, y: number): void {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
         const { x: oldX, y: oldY } = notToPos(this.position);
         const target = this.instance.grid[y][x]
+        const tabPos = this.color === 'white' ? [{ x: 7, y: 7 }, { x: 0, y: 7 }] : [{ x: 7, y: 0 }, { x: 0, y: 0 }];
+        const diff =  Math.abs(oldX - x);
+        const dir = oldX > x ? -1 : 1
         let pieceCaptured: boolean = typeof target !== "number";
         let pieceValue: number = 0;
         this.instance.grid[oldY][oldX] = 0;
@@ -64,16 +85,30 @@ export class King extends Piece {
                 to: posToNot(x, y)
             })
         }
+        if (Math.abs(oldX - x) === 2) {
+            const isLongCastle = (oldX > x);
+            const rookStartX = isLongCastle ? 0 : 7;
+            const rookEndX = isLongCastle ? 3 : 5;
+            const supp = isLongCastle ? 1 : 0
+            const rook = this.instance.grid[y][rookStartX] as Rook;
+            this.instance.grid[y][rookStartX] = 0;
+            this.instance.grid[y][rookEndX] = rook;
+    
+            if (rook) rook.position = posToNot(rookEndX, y);
+    
+            rook.canRook = false;
+            this.canRook = false;
+        }
         let event = Events.Move;
         let notation = `K${posToNot(x, y)}`;
 
         if (this.instance.makeCheck(this.color)) {
             event |= Events.Check;
             notation += "+";
-        } 
+        }
         if (pieceCaptured) {
             event |= Events.PieceCaptured;
-            notation = `Kx${posToNot(x, y)}${notation.includes("+") ? "+": ""}`;
+            notation = `Kx${posToNot(x, y)}${notation.includes("+") ? "+" : ""}`;
         }
 
         this.instance.emit(event, {

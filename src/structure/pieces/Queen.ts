@@ -43,8 +43,7 @@ export class Queen extends Piece {
     public canMoveTo(x: number, y: number): boolean {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
         const newPosNot = posToNot(x, y);
-        if (this.getAvailableMoves(true).includes(newPosNot)) return true;
-        return false;
+        return this.getAvailableMoves(true).includes(newPosNot)
     }
     public moveTo(x: number, y: number): void {
         if (!this.isValidPosition(x, y)) throw new Error('Invalid position.');
