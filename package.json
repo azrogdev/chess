@@ -1,0 +1,28 @@
+{
+  "name": "chess",
+  "version": "1.0.0",
+  "description": "an advanced chess structure",
+  "main": "./compile/main.js",
+  "type": "module",
+  "types": "./types/main.d.ts",
+  "scripts": {
+    "test": "echo \\\"Error: no test specified\\\" && exit 1",
+    "build": "babel src --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azrogdev/chess.git"
+  },
+  "keywords": [
+    "chess"
+  ],
+  "author": "azrogdev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/azrogdev/chess/issues"
+  },
+  "homepage": "https://github.com/azrogdev/chess#readme",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
