@@ -159,8 +159,10 @@ export class Chess extends EventEmitter implements GameOptions {
                 event |= Events.PieceCaptured;
                 notation = `${this.getPieceSymbol(piece).charAt(0)}x${move}${notation.includes("+") ? "+" : ""}`;
             }
+            const oldPos = piece.position;
             this.makeMove(this.grid, notToPos(move), piece);
             this.emit(event, {
+                from: oldPos,
                 to: piece.position,
                 piece: piece.constructor.name,
                 notation: notation,
