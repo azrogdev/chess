@@ -385,14 +385,3 @@ export class Chess extends EventEmitter implements GameOptions {
         return grid;
     }
 }
-
-
-
-const game = new Chess({
-    bot: true
-})
-
-
-
-
-
